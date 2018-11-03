@@ -13,7 +13,7 @@ Created on Sat Oct 27 14:16:49 2018
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.autograd import Variable
+#from torch.autograd import Variable
 
 
 ###############################################################################
@@ -66,10 +66,12 @@ class DeKrypt(nn.Module):
 ###############################################################################
 def word2tensor(word):
     tensor = torch.zeros(10,128)
+    word += (10-len(word))*' '  
     i = 0
     for char in word:   
         tensor[i][ord(char)] = 1
         i= i+1
+    i = 0
     return tensor
     
 def tensor2word(tensor):
@@ -78,7 +80,7 @@ def tensor2word(tensor):
     for column in tensor:
         index = column.argmax()
 
-        word = word + chr(index)
+        word += chr(index)
         i=i+1
     return word
 
@@ -89,23 +91,28 @@ def main():
  #   word = tensor2word(tens)
  #   print(word)
 
-    krypt = Krypt()
-    dekrypt = DeKrypt()
-    spy = Spy()
+#    krypt = Krypt()
+#    dekrypt = DeKrypt()
+#    spy = Spy()
+    
+    test = Krypt()
 
     input = m_tens
-    for i in range(2000):
+    for i in range(3000):
 #        print("\n\nMessage Input:\n")
 #        print(input)
 
-        output = krypt(input)
+        #output = krypt(input)
 #        print(output)
 
-        message_out = dekrypt(output)
+
+        message_out = test(input)
+        #message_out = dekrypt(output)
 #        print("\n\nMessage Output:\n")
 #        print(message_out)
 
-        bugging = spy(output)
+
+        #bugging = spy(output)
 #        print("\n\nBugging:\n")
 #        print(bugging)
 
@@ -125,13 +132,21 @@ def main():
 #        loss_krypt.backward()
 #        opti_krypt = optim.SGD(krypt.parameters(), lr=0.5)
 #        opti_krypt.step()
-
-        crit_dekrypt = nn.MSELoss()
-        loss_dekrypt = crit_dekrypt(m_tens, message_out)
-        dekrypt.zero_grad()
-        loss_dekrypt.backward()
-        opti_dekrypt = optim.SGD(dekrypt.parameters(), lr=0.5)
-        opti_dekrypt.step()
+        
+        crit_test = nn.MSELoss()
+        loss_test = crit_test(message_out, m_tens)
+        test.zero_grad()
+        loss_test.backward()
+        opti_test = optim.SGD(test.parameters(), lr=0.7)
+        opti_test.step()
+        
+#
+#        crit_dekrypt = nn.MSELoss()
+#        loss_dekrypt = crit_dekrypt(m_tens, message_out)
+#        dekrypt.zero_grad()
+#        loss_dekrypt.backward()
+#        opti_dekrypt = optim.SGD(dekrypt.parameters(), lr=0.5)
+#        opti_dekrypt.step()
 
 #        crit_spy = nn.MSELoss()
 #        loss_spy = crit_spy(target, message_out)
@@ -142,6 +157,6 @@ def main():
         #output= tensor2word(tens)
         
 #
-        print(tensor2word(output))
+        print('Antwort: '+tensor2word(message_out))
 if __name__ == "__main__":
     main()
