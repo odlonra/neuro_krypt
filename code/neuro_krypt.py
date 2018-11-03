@@ -41,37 +41,12 @@ class Krypt(nn.Module):
 
 
 ###############################################################################
-
-
-class Spy(nn.Module):
-    def __init__(self):
-        super(Spy, self).__init__()
-
-        self.lin1 = nn.Linear(128,500)
-        self.lin2 = nn.Linear(500,1000)
-        self.lin3 = nn.Linear(1000,128)
-
-    def forward(self, x):
-        x = torch.relu_(self.lin1(x))
-        x = torch.sigmoid(self.lin2(x))
-        x = torch.tanh(self.lin3(x))
-        return x
-
-    def num_flat_features(self, x):
-        size = x.size()[1:]
-        num_features = 1
-        for s in size:
-            num_features *= s
-        return num_features
-
-
-###############################################################################
 class DeKrypt(nn.Module):
     def __init__(self):
         super(DeKrypt, self).__init__()
-        self.lin1 = nn.Linear(50, 100)
+        self.lin1 = nn.Linear(128, 100)
         self.lin2 = nn.Linear(100, 500)
-        self.lin3 = nn.Linear(500, 50)
+        self.lin3 = nn.Linear(500, 128)
 
     def forward(self, x):
         x = torch.relu_(self.lin1(x))
@@ -90,29 +65,36 @@ class DeKrypt(nn.Module):
 ###############################################################################
 ###############################################################################
 def word2tensor(word):
-    for i in word:
-        
-        
-    
+    tensor = torch.zeros(10,128)
+    i = 0
+    for char in word:   
+        tensor[i][ord(char)] = 1
+        i= i+1
     return tensor
     
-def tensor2word():
-    
+def tensor2word(tensor):
+    word = ""
+    i=0
+    for column in tensor:
+        index = column.argmax()
+
+        word = word + chr(index)
+        i=i+1
     return word
 
-
-
-
-
-
 def main():
+    
+    message = 'arne'
+    m_tens = word2tensor(message)
+ #   word = tensor2word(tens)
+ #   print(word)
 
     krypt = Krypt()
     dekrypt = DeKrypt()
     spy = Spy()
 
-    input = Variable(torch.randn(10, 50))
-    for i in range(200):
+    input = m_tens
+    for i in range(2000):
 #        print("\n\nMessage Input:\n")
 #        print(input)
 
@@ -128,12 +110,12 @@ def main():
 #        print(bugging)
 
         ###Test
-        targ_tens = torch.zeros(10, 50)
-        targ_tens[0][0] = 1
-        targ_tens[1][17] = 1
-        targ_tens[2][13] = 1
-        targ_tens[3][4] = 1
-        target = Variable(targ_tens)
+#        targ_tens = torch.zeros(10, 128)
+#        targ_tens[0][0] = 1
+#        targ_tens[1][17] = 1
+#        targ_tens[2][13] = 1
+#        targ_tens[3][4] = 1
+#        target = Variable(targ_tens)
 #        print(target)
         ###
 
@@ -145,7 +127,7 @@ def main():
 #        opti_krypt.step()
 
         crit_dekrypt = nn.MSELoss()
-        loss_dekrypt = crit_dekrypt(target, message_out)
+        loss_dekrypt = crit_dekrypt(m_tens, message_out)
         dekrypt.zero_grad()
         loss_dekrypt.backward()
         opti_dekrypt = optim.SGD(dekrypt.parameters(), lr=0.5)
@@ -157,7 +139,9 @@ def main():
 #        loss_spy.backward()
 #        opti_spy = optim.SGD(spy.parameters(), lr=0.5)
 #        opti_spy.step()
-
-    print(output)
+        #output= tensor2word(tens)
+        
+#
+        print(tensor2word(output))
 if __name__ == "__main__":
     main()
