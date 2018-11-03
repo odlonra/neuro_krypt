@@ -21,9 +21,9 @@ from torch.autograd import Variable
 class Krypt(nn.Module):
     def __init__(self):
         super(Krypt, self).__init__()
-        self.lin1 = nn.Linear(50,1000)
+        self.lin1 = nn.Linear(128,1000)
         self.lin2 = nn.Linear(1000,500)
-        self.lin3 = nn.Linear(500,50)
+        self.lin3 = nn.Linear(500,128)
 
     def forward(self, x):
         x = torch.relu_(self.lin1(x))
@@ -42,9 +42,9 @@ class Krypt(nn.Module):
 class Spy(nn.Module):
     def __init__(self):
         super(Spy, self).__init__()
-        self.lin1 = nn.Linear(50,500)
+        self.lin1 = nn.Linear(128,500)
         self.lin2 = nn.Linear(500,1000)
-        self.lin3 = nn.Linear(1000,50)
+        self.lin3 = nn.Linear(1000,128)
 
     def forward(self, x):
         x = torch.relu_(self.lin1(x))
