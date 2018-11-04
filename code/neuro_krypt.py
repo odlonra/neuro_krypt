@@ -22,9 +22,9 @@ class Krypt(nn.Module):
     def __init__(self):
         super(Krypt, self).__init__()
 
-        self.lin1 = nn.Linear(128,1000)
-        self.lin2 = nn.Linear(1000,500)
-        self.lin3 = nn.Linear(500,128)
+        self.lin1 = nn.Linear(128,500)
+        self.lin2 = nn.Linear(500,1000)
+        self.lin3 = nn.Linear(1000,128)
 
     def forward(self, x):
         x = torch.relu_(self.lin1(x))
@@ -64,16 +64,21 @@ class DeKrypt(nn.Module):
 
 ###############################################################################
 ###############################################################################
+'''
+This function translates a string into an tensor.
+'''
 def word2tensor(word):
-    tensor = torch.zeros(10,128)
-    word += (10-len(word))*' '  
+    tensor = torch.zeros(len(word),128)
+#    word += (10-len(word))*' '  
     i = 0
     for char in word:   
         tensor[i][ord(char)] = 1
         i= i+1
     i = 0
     return tensor
-    
+'''
+This function translates a tensor back into a string.
+'''    
 def tensor2word(tensor):
     word = ""
     i=0
@@ -85,20 +90,23 @@ def tensor2word(tensor):
     return word
 
 def main():
-    
-    message = 'arne'
+    print(torch.cuda.get_device_name(torch.cuda.current_device()))
+    message = 'Arne ist im Zug.'
     m_tens = word2tensor(message)
+    m_tens = m_tens.cuda()
  #   word = tensor2word(tens)
  #   print(word)
 
 #    krypt = Krypt()
-#    dekrypt = DeKrypt()
+#    dekrypt = Krypt()
+#    dekrypt.cuda()
 #    spy = Spy()
     
     test = Krypt()
+    test = test.cuda()
 
     input = m_tens
-    for i in range(3000):
+    for i in range(2000):
 #        print("\n\nMessage Input:\n")
 #        print(input)
 
@@ -106,7 +114,14 @@ def main():
 #        print(output)
 
 
-        message_out = test(input)
+#        message_krypt = test(input)
+        
+ #       print('Kryp: '+tensor2word(message_krypt))
+        
+        
+#        message_out = dekrypt(message_krypt)
+        message_out =  test(input)
+       
         #message_out = dekrypt(output)
 #        print("\n\nMessage Output:\n")
 #        print(message_out)
@@ -137,10 +152,10 @@ def main():
         loss_test = crit_test(message_out, m_tens)
         test.zero_grad()
         loss_test.backward()
-        opti_test = optim.SGD(test.parameters(), lr=0.7)
+        opti_test = optim.SGD(test.parameters(), lr=1)
         opti_test.step()
         
-#
+##
 #        crit_dekrypt = nn.MSELoss()
 #        loss_dekrypt = crit_dekrypt(m_tens, message_out)
 #        dekrypt.zero_grad()
